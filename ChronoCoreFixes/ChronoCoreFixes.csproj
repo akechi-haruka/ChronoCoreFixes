@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net35</TargetFramework>
+    <AssemblyName>ChronoCoreFixes</AssemblyName>
+    <Description>Chrono Regalia Core Fixes</Description>
+    <Version>1.0.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="UnityEngine.Modules" Version="2017.4.29" IncludeAssets="compile" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="0Harmony20">
+      <HintPath>L:\SDVX\chrono\bin\BepInEx\core\0Harmony20.dll</HintPath>
+    </Reference>
+    <Reference Include="AMDaemon.NET">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\AMDaemon.NET-nstrip.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\Assembly-CSharp-nstrip.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>L:\SDVX\chrono\bin\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>L:\SDVX\chrono\bin\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Preloader">
+      <HintPath>L:\SDVX\chrono\bin\BepInEx\core\BepInEx.Preloader.dll</HintPath>
+    </Reference>
+    <Reference Include="TextMeshPro-1.0.55.2017.1.0b12">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\TextMeshPro-1.0.55.2017.1.0b12.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>L:\SDVX\chrono\bin\hkb_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;D:\MEGA\konmaidev\ChronoCoreFixes\ChronoCoreFixes\bin\Debug\net35\ChronoCoreFixes.dll&quot; &quot;L:\SDVX\chrono\bin\BepInEx\plugins\ChronoCoreFixes.dll&quot;" />
+  </Target>
+</Project>
