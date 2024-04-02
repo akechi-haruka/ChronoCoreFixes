@@ -81,7 +81,7 @@ namespace ChronoCoreFixes {
             #region Set up config
             ConfigPathFixes = Config.Bind("General", "Y: Drive Fix", true, "Redirects the Y:\\ drive (and the option folder) to the path specified in segatools.ini");
             ConfigMenuTimer = Config.Bind("General", "Menu Timer", 300, new ConfigDescription("Changes the main menu timer", new AcceptableValueRange<int>(300, 999)));
-            ConfigMatchingTimer = Config.Bind("General", "Matching Timer", 30, new ConfigDescription("Changes the matching timer", new AcceptableValueRange<int>(30, 999)));
+            ConfigMatchingTimer = Config.Bind("General", "Matching Timer", 30, new ConfigDescription("Changes the matching timer", new AcceptableValueRange<int>(30, 500)));
 
             ConfigNetworkTimeout = Config.Bind("Network", "Network Timeout", 30, new ConfigDescription("Changes the amount of seconds until online gameplay will time out due to disconnection", new AcceptableValueRange<int>(5, 60)));
             ConfigAutoReconnect = Config.Bind("Network", "Auto-Reconnect", true, new ConfigDescription("If timeout is hit, attempts to reconnect."));

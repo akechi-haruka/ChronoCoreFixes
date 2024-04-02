@@ -52,6 +52,12 @@ namespace ChronoCoreFixes.Patches {
             return true;
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(TransportTCP), "Create")]
+        static bool Create(TransportTCP __instance, ref bool __result, string address, int port) {
+            Plugin.Log.LogInfo("Connecting to matching server at " + address + ":" + port);
+            return true;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(TransportUDP), "IsConnected")]
         static bool IsConnected(TransportUDP __instance, ref bool __result) {
             __result = __instance.m_isConnected || InReconnectState;
