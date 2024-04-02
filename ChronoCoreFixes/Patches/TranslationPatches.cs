@@ -12,7 +12,7 @@ namespace ChronoCoreFixes.Patches {
         [HarmonyPostfix, HarmonyPatch(typeof(BattleCaution), "Init")]
         static void Init(BattleCaution __instance) {
             if (Plugin.ConfigHardTranslations.Value) {
-                AccessTools.DeclaredField(typeof(BattleCaution), "m_CautionString").SetValue(__instance, File.ReadAllLines("BepInEx/Translation/en/CFF_BATTLE_CAUTION.txt"));
+                AccessTools.DeclaredField(typeof(BattleCaution), "m_CautionString").SetValue(__instance, File.ReadAllLines("BepInEx/Translation/en/Text/CFF_BATTLE_CAUTION.txt"));
             }
         }
 
@@ -59,6 +59,9 @@ namespace ChronoCoreFixes.Patches {
                                     };
                                     if (tags[i].Length > keyword_length) {
                                         string text2 = tags[i].Substring(keyword_length, 1);
+                                        if (text2 == " ") { // fix offset for space in English translation
+                                            text2 = tags[i].Substring(keyword_length + 1, 1);
+                                        }
                                         if (text2 == "Ⅰ") {
                                             linkInfo.m_Grade = 1;
                                         } else if (text2 == "Ⅱ") {
@@ -86,6 +89,9 @@ namespace ChronoCoreFixes.Patches {
                                         };
                                         if (tags[i].Length > keyword_length) {
                                             string text4 = tags[i].Substring(keyword_length, 1);
+                                            if (text4 == " ") { // fix offset for space in English translation
+                                                text4 = tags[i].Substring(keyword_length + 1, 1);
+                                            }
                                             if (text4 == "Ⅰ") {
                                                 linkInfo2.m_Grade = 1;
                                             } else if (text4 == "Ⅱ") {
