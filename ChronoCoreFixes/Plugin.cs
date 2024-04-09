@@ -30,7 +30,7 @@ namespace ChronoCoreFixes {
         Auto, ForceTerminal, ForceSatellite
     }
 
-    [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", "2.2")]
+    [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", "2.2.1")]
     public class Plugin : BaseUnityPlugin {
 
         private static Plugin Instance;
@@ -98,7 +98,7 @@ namespace ChronoCoreFixes {
             GraphicShowSimpleClouds = Config.Bind("Graphics", "Simple Clouds", true, "Renders simple clouds. (~5% rendering time)");
             GraphicShowLighting = Config.Bind("Graphics", "Lighting (Main)", true, "Renders light. (~15% rendering time)");
             GraphicShowLighting2 = Config.Bind("Graphics", "Lighting (Probe)", true, "Renders light. (~5% rendering time)");
-            GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", true, "Disables forced VSync. Breaks animation speed on >60Hz monitors.");
+            GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", false, "Disables forced VSync. Breaks animation speed on >60Hz monitors. See advanced settings for further usage.");
             GraphicFPS = Config.Bind("Graphics", "FPS cap (A)(!)(*)(*)", 30, new ConfigDescription("Changes the combat engine's expected refresh rate.\n\n(A) Advanced setting\n(!) For online play, combat speed must match or the faster player will time out! Do not enter public lobbies with this setting changed!\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", new AcceptableValueRange<int>(30, 144), new ConfigurationManagerAttributes() {
                 IsAdvanced = true
             }));
