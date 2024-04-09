@@ -98,7 +98,7 @@ namespace ChronoCoreFixes {
             GraphicShowSimpleClouds = Config.Bind("Graphics", "Simple Clouds", true, "Renders simple clouds. (~5% rendering time)");
             GraphicShowLighting = Config.Bind("Graphics", "Lighting (Main)", true, "Renders light. (~15% rendering time)");
             GraphicShowLighting2 = Config.Bind("Graphics", "Lighting (Probe)", true, "Renders light. (~5% rendering time)");
-            GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", false, "Disables forced VSync. Breaks animation speed on >60Hz monitors. See advanced settings for further usage.");
+            GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", true, "Disables forced VSync. Breaks animation speed on >60Hz monitors. See advanced settings for further usage.");
             GraphicFPS = Config.Bind("Graphics", "FPS cap (A)(!)(*)(*)", 30, new ConfigDescription("Changes the combat engine's expected refresh rate.\n\n(A) Advanced setting\n(!) For online play, combat speed must match or the faster player will time out! Do not enter public lobbies with this setting changed!\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", new AcceptableValueRange<int>(30, 144), new ConfigurationManagerAttributes() {
                 IsAdvanced = true
             }));
@@ -148,6 +148,7 @@ namespace ChronoCoreFixes {
                 WantedBootMode = GameBootMode.Auto;
             }
 
+
             FireMatchingSettingChanged();
             ApplyStringMods();
             UpdateCTConstants(null, null);
@@ -158,8 +159,8 @@ namespace ChronoCoreFixes {
             if (GraphicFPS.Value != 30) {
                 AccessTools.DeclaredField(typeof(CT), "FPS").SetValue(null, GraphicFPS.Value);
                 QualitySettings.vSyncCount = 0;
-                Application.targetFrameRate = GraphicFPS.Value;
             }
+            Application.targetFrameRate = GraphicFPS.Value;
             if (BattleEngineLockStepModifier.Value != 1) {
                 AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, BattleEngineLockStepModifier.Value);
             }
@@ -209,6 +210,7 @@ namespace ChronoCoreFixes {
             FindObjectAndSwitch("Stage/Environment/bg_com_distantview00(Clone)/base_cloud", GraphicShowSimpleClouds.Value);
 
             QualitySettings.vSyncCount = GraphicForceDisableVsync.Value ? 0 : 1;
+            Log.LogDebug("VSync: " + QualitySettings.vSyncCount);
             QualitySettings.shadowResolution = GraphicShadowResolution.Value;
             QualitySettings.shadows = GraphicShadowQuality.Value;
             QualitySettings.anisotropicFiltering = GraphicAnisotropicFiltering.Value;
