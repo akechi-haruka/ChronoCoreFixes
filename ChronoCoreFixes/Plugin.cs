@@ -15,6 +15,8 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
@@ -30,8 +32,14 @@ namespace ChronoCoreFixes {
         Auto, ForceTerminal, ForceSatellite
     }
 
-    [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", "2.2.1")]
+    public enum FPSSetting {
+        FPS30, FPS60, FPS120
+    }
+
+    [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
+
+        public const String VER = "2.3";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -51,7 +59,7 @@ namespace ChronoCoreFixes {
         public static ConfigEntry<bool> GraphicShowLighting;
         public static ConfigEntry<bool> GraphicShowLighting2;
         public static ConfigEntry<bool> GraphicForceDisableVsync;
-        public static ConfigEntry<int> GraphicFPS;
+        public static ConfigEntry<FPSSetting> GraphicFPS;
         public static ConfigEntry<int> BattleEngineLockStepModifier;
         public static ConfigEntry<ShadowResolution> GraphicShadowResolution;
         public static ConfigEntry<ShadowQuality> GraphicShadowQuality;
@@ -85,7 +93,7 @@ namespace ChronoCoreFixes {
 
             ConfigNetworkTimeout = Config.Bind("Network", "Network Timeout", 30, new ConfigDescription("Changes the amount of seconds until online gameplay will time out due to disconnection", new AcceptableValueRange<int>(5, 60)));
             ConfigAutoReconnect = Config.Bind("Network", "Auto-Reconnect", true, new ConfigDescription("If timeout is hit, attempts to reconnect."));
-            ConfigAutoReconnectRetries = Config.Bind("Network", "Auto-Reconnect Retries", 1, new ConfigDescription("How often reconnection is attempted.", new AcceptableValueRange<int>(1, 999)));
+            ConfigAutoReconnectRetries = Config.Bind("Network", "Auto-Reconnect Retries", 50, new ConfigDescription("How often reconnection is attempted.", new AcceptableValueRange<int>(1, 999)));
             ConfigMatchingNetmask = Config.Bind("Network", "Matching Network Adapter (*)", "", "The subnet mask of the network adapter to use.\nThe player you are trying to match with must also be in this subnet.\nFor example, if you have an IP address of \"5.7.3.15\", then enter \"5.7.3.255\" here.\n\n(*) Leave blank to use default game behaviour (157.109.255.255)");
             ConfigMatchingNetmask.SettingChanged += ConfigMatchingNetmask_SettingChanged;
             ConfigMatchingQuickSync = Config.Bind("Network", "Matching Sync Patch", false, "Forces matching P2P connections to be \"ready\" earlier. Enable on slow computers, and only on those. Having this falsely enabled will cause a matching connection timeout. This setting does not need to match up on both players.");
@@ -99,7 +107,7 @@ namespace ChronoCoreFixes {
             GraphicShowLighting = Config.Bind("Graphics", "Lighting (Main)", true, "Renders light. (~15% rendering time)");
             GraphicShowLighting2 = Config.Bind("Graphics", "Lighting (Probe)", true, "Renders light. (~5% rendering time)");
             GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", true, "Disables forced VSync. Breaks animation speed on >60Hz monitors. See advanced settings for further usage.");
-            GraphicFPS = Config.Bind("Graphics", "FPS cap (A)(!)(*)(*)", 30, new ConfigDescription("Changes the combat engine's expected refresh rate.\n\n(A) Advanced setting\n(!) For online play, combat speed must match or the faster player will time out! Do not enter public lobbies with this setting changed!\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", new AcceptableValueRange<int>(30, 144), new ConfigurationManagerAttributes() {
+            GraphicFPS = Config.Bind("Graphics", "FPS cap (A)(!)(*)(*)", FPSSetting.FPS30, new ConfigDescription("Changes the combat engine's expected refresh rate.\n\n(A) Advanced setting\n(!) For online play, combat speed must match or the faster player will time out! Do not enter public lobbies with this setting changed!\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", null, new ConfigurationManagerAttributes() {
                 IsAdvanced = true
             }));
             GraphicShadowResolution = Config.Bind("Graphics", "Shadow Resolution", QualitySettings.shadowResolution, "Set the unity shadow resolution");
@@ -139,6 +147,7 @@ namespace ChronoCoreFixes {
             h.PatchAll(typeof(ServerExtensionPatches));
             h.PatchAll(typeof(TranslationPatches));
             h.PatchAll(typeof(ReconnectSystem));
+            h.PatchAll(typeof(TickSyncSystem));
 
             if (Environment.GetCommandLineArgs().Contains("-mod-chronocorefixes-force-terminal")) {
                 WantedBootMode = GameBootMode.ForceTerminal;
@@ -156,13 +165,23 @@ namespace ChronoCoreFixes {
 
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
-            if (GraphicFPS.Value != 30) {
+            if (GraphicFPS.Value != FPSSetting.FPS30) {
                 AccessTools.DeclaredField(typeof(CT), "FPS").SetValue(null, GraphicFPS.Value);
                 QualitySettings.vSyncCount = 0;
             }
-            Application.targetFrameRate = GraphicFPS.Value;
+            switch (GraphicFPS.Value) {
+                case FPSSetting.FPS30:
+                    Application.targetFrameRate = 30;
+                    break;
+                case FPSSetting.FPS60:
+                    Application.targetFrameRate = 60;
+                    break;
+                case FPSSetting.FPS120:
+                    Application.targetFrameRate = 120;
+                    break;
+            }
             if (BattleEngineLockStepModifier.Value != 1) {
-                AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, BattleEngineLockStepModifier.Value);
+                ApplyTurnStepMod(BattleEngineLockStepModifier.Value);
             }
 
             if (CT.FPS * CT.TURN_STEP_SECOND != 30) {
@@ -170,6 +189,10 @@ namespace ChronoCoreFixes {
             }
 
             Logger.LogInfo("Plugin is loaded!");
+        }
+
+        public static void ApplyTurnStepMod(int value) {
+            AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, BattleEngineLockStepModifier.Value);
         }
 
         private void ApplyStringMods() {
@@ -295,6 +318,18 @@ namespace ChronoCoreFixes {
                 Cursor.visible = true;
             } else if (!ConfigShowMouse.Value && Cursor.visible) {
                 Cursor.visible = false;
+            }
+        }
+
+        public static string Md5(string filename) {
+            if (!File.Exists(filename)) {
+                return null;
+            }
+            using (var md5 = MD5.Create()) {
+                using (var stream = File.OpenRead(filename)) {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
             }
         }
 

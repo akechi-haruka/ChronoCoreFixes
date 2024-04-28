@@ -52,5 +52,17 @@ namespace ChronoCoreFixes.Patches {
             return false;
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(Battle), "Start")]
+        static void Start(Battle __instance) {
+            AccessTools.DeclaredPropertySetter(typeof(Battle), "m_TurnStepFrameMax").Invoke(__instance, new object[] { CT.TURN_STEP_SECOND * 30 });
+            Plugin.Log.LogDebug("Battle m_TurnStepFrameMax readjusted to " + __instance.m_TurnStepFrameMax);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(Force), "Init")]
+        static void Init(Force __instance) {
+            AccessTools.DeclaredPropertySetter(typeof(Force), "m_TurnStepFrameMax").Invoke(__instance, new object[] { CT.TURN_STEP_SECOND * 30 });
+            Plugin.Log.LogDebug("Force m_TurnStepFrameMax readjusted to " + __instance.m_TurnStepFrameMax);
+        }
+
     }
 }

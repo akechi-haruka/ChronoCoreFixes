@@ -15,6 +15,7 @@ namespace ChronoCoreFixes.Patches {
                     __result = 30;
                     break;
                 case HeaderInformation.SceneName.Home:
+                    TickSyncSystem.Reset();
                     __result = Plugin.ConfigMenuTimer.Value;
                     break;
                 case HeaderInformation.SceneName.Matching:
