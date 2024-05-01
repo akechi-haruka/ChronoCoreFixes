@@ -107,7 +107,7 @@ namespace ChronoCoreFixes {
             GraphicShowLighting = Config.Bind("Graphics", "Lighting (Main)", true, "Renders light. (~15% rendering time)");
             GraphicShowLighting2 = Config.Bind("Graphics", "Lighting (Probe)", true, "Renders light. (~5% rendering time)");
             GraphicForceDisableVsync = Config.Bind("Graphics", "VSync Fix", true, "Disables forced VSync. Breaks animation speed on >60Hz monitors. See advanced settings for further usage.");
-            GraphicFPS = Config.Bind("Graphics", "FPS cap (A)(!)(*)(*)", FPSSetting.FPS30, new ConfigDescription("Changes the combat engine's expected refresh rate, and also the game's FPS.\n\n(A) Advanced setting\n(!) For online play, combat speed combined with Tick Delay must match or de-sync will occur! GMG supports automatic tick sync.\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", null, new ConfigurationManagerAttributes() {
+            GraphicFPS = Config.Bind("Graphics", "FPS Limit (A)(!)(*)(*)", FPSSetting.FPS30, new ConfigDescription("Changes the combat engine's expected refresh rate, and also the game's FPS.\n\n(A) Advanced setting\n(!) For online play, combat speed combined with Tick Delay must match or de-sync will occur! GMG supports automatic tick sync.\n(*) V-Sync Fix must be enabled for this to work\n(*) Changes require game restart", null, new ConfigurationManagerAttributes() {
                 IsAdvanced = true
             }));
             GraphicShadowResolution = Config.Bind("Graphics", "Shadow Resolution", QualitySettings.shadowResolution, "Set the unity shadow resolution");
