@@ -28,7 +28,7 @@ namespace ChronoCoreFixes.Patches {
             Plugin.ApplyTurnStepMod(Plugin.BattleEngineLockStepModifier.Value);
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(JsonUtility), "ToJson")]
+        [HarmonyPrefix, HarmonyPatch(typeof(JsonUtility), "ToJson", typeof(object))]
         static bool ToJson(object obj, ref string __result) {
             if (obj is RequestMatchingData rmd1) {
                 Plugin.Log.LogDebug("Replacing RequestMatchingData");

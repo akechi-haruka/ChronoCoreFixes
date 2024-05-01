@@ -165,10 +165,6 @@ namespace ChronoCoreFixes {
 
             SceneManager.sceneLoaded += SceneManager_sceneLoaded;
 
-            if (GraphicFPS.Value != FPSSetting.FPS30) {
-                AccessTools.DeclaredField(typeof(CT), "FPS").SetValue(null, GraphicFPS.Value);
-                QualitySettings.vSyncCount = 0;
-            }
             switch (GraphicFPS.Value) {
                 case FPSSetting.FPS30:
                     Application.targetFrameRate = 30;
@@ -179,6 +175,10 @@ namespace ChronoCoreFixes {
                 case FPSSetting.FPS120:
                     Application.targetFrameRate = 120;
                     break;
+            }
+            if (GraphicFPS.Value != FPSSetting.FPS30) {
+                AccessTools.DeclaredField(typeof(CT), "FPS").SetValue(null, Application.targetFrameRate);
+                QualitySettings.vSyncCount = 0;
             }
             if (BattleEngineLockStepModifier.Value != 1) {
                 ApplyTurnStepMod(BattleEngineLockStepModifier.Value);
