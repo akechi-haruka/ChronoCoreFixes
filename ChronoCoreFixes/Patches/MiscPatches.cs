@@ -1,9 +1,14 @@
-﻿using HarmonyLib;
+﻿using Comio;
+using Comio.BD15093_6;
+using HarmonyLib;
+using MU3.Mecha;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace ChronoCoreFixes.Patches {
     internal class MiscPatches {
@@ -62,6 +67,48 @@ namespace ChronoCoreFixes.Patches {
         static void Init(Force __instance) {
             AccessTools.DeclaredPropertySetter(typeof(Force), "m_TurnStepFrameMax").Invoke(__instance, new object[] { CT.TURN_STEP_SECOND * 30 });
             Plugin.Log.LogDebug("Force m_TurnStepFrameMax readjusted to " + __instance.m_TurnStepFrameMax);
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(MechaManager), "initialize")]
+        static bool initialize(ref MechaManager.InitParam initParam) {
+            if (Plugin.LEDPort.Value > 0) {
+                Plugin.Log.LogInfo("Redirecting LED COM port to " + Plugin.LEDPort.Value);
+                initParam.ledParam.comName = "COM" + Plugin.LEDPort.Value;
+            }
+            BoardCtrl15093_6.BoardNo.text = "15093-06";
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(BoardCtrl15093_6), "_md_initBoard_GetFirmSum")]
+        static bool _md_initBoard_GetFirmSum(BoardCtrl15093_6 __instance) {
+            global::UnityEngine.Debug.Log("BoardCtrl._md_initBoard_GetFirmSum()");
+            if (__instance.execCommand(__instance._getFirmSumCommand)) {
+                __instance._boardSpecInfo.firmInfo.sum = __instance._getFirmSumCommand.getSum();
+                __instance._isBoardSpecInfoRecv = true;
+                if (!__instance._boardSpecInfo.firmInfo.isAppliMode()) {
+                    Plugin.Log.LogError("Appli mode is off");
+                    __instance._setError(ErrorNo.FirmError);
+                    return false;
+                }
+                if (!__instance._boardSpecInfo.customChipNo.isEqual(__instance._initParam.customChipNo)) {
+                    Plugin.Log.LogError("board chip no = \""+ __instance._boardSpecInfo.customChipNo.text + "\" vs expected \""+__instance._initParam.customChipNo.text + "\"");
+                    __instance._setError(ErrorNo.FirmVersionError);
+                    return false;
+                }
+                if (!__instance.checkFirmVersion(__instance._boardSpecInfo.firmInfo.revision, __instance._initParam.firmVersion)) {
+                    Plugin.Log.LogError("board rev = \"" + __instance._boardSpecInfo.firmInfo.revision + "\" vs expected \"" + __instance._initParam.firmVersion + "\"");
+                    __instance._setError(ErrorNo.FirmVersionError);
+                    return false;
+                }
+                if (__instance._boardSpecInfo.firmInfo.sum != __instance._initParam.firmSum) {
+                    Plugin.Log.LogError("board sum = \"" + __instance._boardSpecInfo.firmInfo.sum + "\" vs expected \"" + __instance._initParam.firmSum + "\"");
+                    __instance._setError(ErrorNo.FirmVersionError);
+                    return false;
+                }
+                __instance._setTimeoutCommand.setTimeout(0);
+                __instance._mode = BoardCtrl15093_6.Mode.MD_InitBoard_SetTimeoutInfinite;
+            }
+            return false;
         }
 
     }

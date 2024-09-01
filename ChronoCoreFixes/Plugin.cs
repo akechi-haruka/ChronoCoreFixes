@@ -39,7 +39,7 @@ namespace ChronoCoreFixes {
     [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
 
-        public const String VER = "2.3";
+        public const String VER = "2.4";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -70,6 +70,7 @@ namespace ChronoCoreFixes {
         public static ConfigEntry<int> ConfigMaxCP;
         public static ConfigEntry<bool> ConfigPathFixes;
         public static ConfigEntry<bool> ConfigForceTerminalKeyboardEmulation;
+        public static ConfigEntry<int> LEDPort;
 
         public static String YDrivePath = null;
         public static String OptionPath = null;
@@ -122,6 +123,8 @@ namespace ChronoCoreFixes {
             BattleEngineLockStepModifier = Config.Bind("Gameplay", "Combat Engine Tick Delay (A)(!)(*)", 1, new ConfigDescription("Changes the combat engine's tick delay. The higher this number, the longer the game will be synchronized for. Change this slowly upwards on higher FPS rates. Can also be modified seperately with no changes to FPS to slow down game speed.\n\n(A) Advanced setting\n(!) For online play, combat speed must match or the faster player will time out! Do not enter public lobbies with this setting changed!\n(*) Changes require game restart", new AcceptableValueRange<int>(1, 5), new ConfigurationManagerAttributes() {
                 IsAdvanced = true
             }));
+
+            LEDPort = Config.Bind("Real Hardware", "LED Port", 0, "Overrides the LED port. If 0, default is used (based on terminal/satellite)");
 
             GraphicShowSandglass.SettingChanged += UpdateGraphicSettings;
             GraphicShowVolumetricClouds.SettingChanged += UpdateGraphicSettings;
