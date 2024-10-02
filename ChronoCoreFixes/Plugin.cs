@@ -39,7 +39,7 @@ namespace ChronoCoreFixes {
     [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
 
-        public const String VER = "2.4";
+        public const String VER = "2.5";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -190,7 +190,6 @@ namespace ChronoCoreFixes {
             if (CT.FPS * CT.TURN_STEP_SECOND != 30) {
                 Logger.LogMessage("CAUTION: Combat engine update speed modified to " + (CT.FPS * CT.TURN_STEP_SECOND));
             }
-
             Logger.LogInfo("Plugin is loaded!");
         }
 
@@ -241,6 +240,20 @@ namespace ChronoCoreFixes {
             QualitySettings.shadows = GraphicShadowQuality.Value;
             QualitySettings.anisotropicFiltering = GraphicAnisotropicFiltering.Value;
             QualitySettings.antiAliasing = GraphicAntiAliasing.Value;
+            foreach (Canvas canvas in global::UnityEngine.Object.FindObjectsOfType<Canvas>())
+            {
+                var screenWidth = Screen.width;
+                var screenHeight = Screen.height;
+                float widthScale = (float)screenWidth / 1920f;
+                float heightScale = (float)screenHeight / 1080f;
+                float scale = Math.Min(widthScale, heightScale);
+
+                //Logger.LogMessage("Canvas: " + canvas.name);
+                //Logger.LogMessage("Scale: " + scale);
+                //Some objects shouldnt be scaled and I don't know how to fix that
+                canvas.scaleFactor = scale;
+            }
+
         }
 
         private void UpdateCTConstants(object sender, EventArgs e) {
