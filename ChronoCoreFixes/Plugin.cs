@@ -196,7 +196,7 @@ namespace ChronoCoreFixes {
         }
 
         public static void ApplyTurnStepMod(int value) {
-            AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, BattleEngineLockStepModifier.Value);
+            AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, value);
         }
 
         private void ApplyStringMods() {

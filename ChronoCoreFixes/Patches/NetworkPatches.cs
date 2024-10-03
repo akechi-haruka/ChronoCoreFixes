@@ -40,21 +40,6 @@ namespace ChronoCoreFixes.Patches {
             return result;
         }
 
-        /*[HarmonyPrefix, HarmonyPatch(typeof(Battle), "CheckNotEndEvent")]
-        static bool CheckNotEndEvent(Battle __instance, ref bool __result) {
-            if (!Plugin.ConfigIgnoreCheckNotEndEvent.Value) {
-                return true;
-            }
-            for (int i = 0; i < __instance.m_ExeEventParam.Length; i++) {
-                if (!__instance.m_ExeEventParam[i].IsEmpty() && !__instance.m_ExeEventParam[i].m_ExeHostType[(int)__instance.m_HostType] && __instance.m_ExeEventParam[i].m_ExeHostType[(int)__instance.m_HostTypeEnemy] && __instance.m_BtlFrame - __instance.m_ExeEventParam[i].m_EndFrame > 600) {
-                    Plugin.Log.LogWarning("CheckNotEndEvent triggered: " + (__instance.m_BtlFrame - __instance.m_ExeEventParam[i].m_EndFrame));
-                    break;
-                }
-            }
-            __result = false;
-            return false;
-        }*/
-
         [HarmonyPrefix, HarmonyPatch(typeof(PacketBattleUserData), "CopyTo")]
         static bool CopyTo(ref PacketBattleUserData dest, PacketBattleUserData __instance) {
             PacketBattleUserData i = __instance;
