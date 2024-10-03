@@ -39,7 +39,7 @@ namespace ChronoCoreFixes {
     [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
 
-        public const String VER = "2.4";
+        public const String VER = "2.4.1";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -195,7 +195,7 @@ namespace ChronoCoreFixes {
         }
 
         public static void ApplyTurnStepMod(int value) {
-            AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, BattleEngineLockStepModifier.Value);
+            AccessTools.DeclaredField(typeof(CT), "TURN_STEP_SECOND").SetValue(null, value);
         }
 
         private void ApplyStringMods() {
