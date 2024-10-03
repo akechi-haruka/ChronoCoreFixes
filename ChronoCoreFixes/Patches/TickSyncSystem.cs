@@ -84,7 +84,7 @@ namespace ChronoCoreFixes.Patches {
                         }
 
                     } else {
-                        Plugin.Log.LogWarning("Opponent not using CCF, can't apply frame sync");
+                        Plugin.Log.LogMessage("Opponent not using CCF, can't apply frame sync. Desync may occur.");
                     }
 
                     __instance.response = resp;

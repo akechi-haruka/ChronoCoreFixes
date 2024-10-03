@@ -188,5 +188,20 @@ namespace ChronoCoreFixes.Patches {
             }
             return false;
         }
+
+
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Battle), "CheckNotEndEvent")]
+        static bool CheckNotEndEvent(Battle __instance, ref bool __result) {
+            for (int i = 0; i < __instance.m_ExeEventParam.Length; i++) {
+                if (!__instance.m_ExeEventParam[i].IsEmpty() && !__instance.m_ExeEventParam[i].m_ExeHostType[(int)__instance.m_HostType] && __instance.m_ExeEventParam[i].m_ExeHostType[(int)__instance.m_HostTypeEnemy] && __instance.m_BtlFrame - __instance.m_ExeEventParam[i].m_EndFrame > 600) {
+                    Plugin.Log.LogError("CheckNotEndEvent triggered: " + (__instance.m_BtlFrame - __instance.m_ExeEventParam[i].m_EndFrame));
+                    Plugin.Log.LogMessage("Desynchronization detected ("+ (__instance.m_BtlFrame - __instance.m_ExeEventParam[i].m_EndFrame) + " frames). This is not salvageable.");
+                    Plugin.Log.LogMessage("Make sure you are using an up-to-date CoreFixes version.");
+                    Plugin.Log.LogMessage("Should this occur repeatedly, set FPS to 30 and tick delay to 1.");
+                }
+            }
+            return true;
+        }
     }
 }
