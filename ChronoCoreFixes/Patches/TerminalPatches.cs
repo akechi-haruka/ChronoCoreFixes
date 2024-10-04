@@ -15,10 +15,10 @@ namespace ChronoCoreFixes.Patches {
         static bool GetModelType(ref uint __result) {
             switch (Plugin.WantedBootMode) {
                 case GameBootMode.ForceTerminal:
-                    __result = 2U;
+                    __result = 4U;
                     return false;
                 case GameBootMode.ForceSatellite:
-                    __result = 4U;
+                    __result = 2U;
                     return false;
                 default:
                     return true;

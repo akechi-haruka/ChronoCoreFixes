@@ -161,6 +161,7 @@ namespace ChronoCoreFixes {
             } else {
                 WantedBootMode = GameBootMode.Auto;
             }
+            Log.LogInfo("Wanted Boot Mode: " + WantedBootMode);
 
 
             FireMatchingSettingChanged();
