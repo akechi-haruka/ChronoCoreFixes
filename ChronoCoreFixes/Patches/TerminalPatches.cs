@@ -1,9 +1,12 @@
 ﻿using HarmonyLib;
+using HkbCom;
 using HKBSys;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace ChronoCoreFixes.Patches {
 
@@ -62,6 +65,48 @@ namespace ChronoCoreFixes.Patches {
                 return false;
             }
             return true;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ReplayDataManager), "FetchPersonalReplayData", typeof(ReplaySelectMenuData))]
+        static IEnumerator FetchPersonalReplayData(IEnumerator __result, ReplaySelectMenuData replay, ReplayDataManager __instance) {
+            ComDownloadUserReplay com = new ComDownloadUserReplay(new ComDownloadUserReplay.RequestData {
+                replayId = replay.id
+            });
+            SingletonMonoBehaviour<ComIo>.Instance.Request(com);
+            yield return new WaitWhile(() => com.IsBusy);
+            if (com.IsError) {
+                Plugin.Log.LogError("Network error downloading replay");
+                yield break;
+            }
+            if (replay.checkSum != Util.GetHashString(com.ResData.replayData)) {
+                if (!Plugin.ConfigIgnoreReplayVersion.Value) {
+                    Plugin.Log.LogError("Checksum error: " + replay.checkSum + " (server), " + Util.GetHashString(com.ResData.replayData) + " (local)");
+                    yield break;
+                }
+            }
+            __instance.personalReplayParams.Add(replay.id, com.ResData.replayData);
+            yield break;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ReplayDataManager), "FetchRankerReplayData", typeof(ReplaySelectMenuData))]
+        static IEnumerator FetchRankerReplayData(IEnumerator __result, ReplaySelectMenuData replay, ReplayDataManager __instance) {
+            ComDownloadRankerReplay com = new ComDownloadRankerReplay(new ComDownloadRankerReplay.RequestData {
+                replayId = replay.id
+            });
+            SingletonMonoBehaviour<ComIo>.Instance.Request(com);
+            yield return new WaitWhile(() => com.IsBusy);
+            if (com.IsError) {
+                Plugin.Log.LogError("Network error downloading replay");
+                yield break;
+            }
+            if (replay.checkSum != Util.GetHashString(com.ResData.replayData)) {
+                if (!Plugin.ConfigIgnoreReplayVersion.Value) {
+                    Plugin.Log.LogError("Checksum error: " + replay.checkSum + " (server), " + Util.GetHashString(com.ResData.replayData) + " (local)");
+                    yield break;
+                }
+            }
+            __instance.replayDataRepository.Persist(replay, com.ResData.replayData);
+            yield break;
         }
 
     }
