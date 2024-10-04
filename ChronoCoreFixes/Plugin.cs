@@ -39,7 +39,7 @@ namespace ChronoCoreFixes {
     [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
 
-        public const String VER = "2.5";
+        public const String VER = "2.5.1";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -72,6 +72,7 @@ namespace ChronoCoreFixes {
         public static ConfigEntry<bool> ConfigPathFixes;
         public static ConfigEntry<bool> ConfigForceTerminalKeyboardEmulation;
         public static ConfigEntry<int> LEDPort;
+        public static ConfigEntry<bool> ConfigIgnoreReplayVersion;
 
         public static String YDrivePath = null;
         public static String OptionPath = null;
@@ -99,6 +100,9 @@ namespace ChronoCoreFixes {
             ConfigMatchingNetmask = Config.Bind("Network", "Matching Network Adapter (*)", "", "The subnet mask of the network adapter to use.\nThe player you are trying to match with must also be in this subnet.\nFor example, if you have an IP address of \"5.7.3.15\", then enter \"5.7.3.255\" here.\n\n(*) Leave blank to use default game behaviour (157.109.255.255)");
             ConfigMatchingNetmask.SettingChanged += ConfigMatchingNetmask_SettingChanged;
             ConfigMatchingQuickSync = Config.Bind("Network", "Matching Sync Patch", false, "Forces matching P2P connections to be \"ready\" earlier. Enable on slow computers, and only on those. Having this falsely enabled will cause a matching connection timeout. This setting does not need to match up on both players.");
+            ConfigIgnoreReplayVersion = Config.Bind("Network", "Ignore Replay Version (A)", false, new ConfigDescription("Ignores the saved version of replays and lets you play them regardless. Will cause desyncs if data is different.\n\n(A) Advanced setting", null, new ConfigurationManagerAttributes() {
+                IsAdvanced = true
+            }));
 
             ConfigShowMouse = Config.Bind("Input", "Show Mouse", true, "Shows the mouse cursor");
             ConfigForceTerminalKeyboardEmulation = Config.Bind("Input", "Terminal Keyboard Emulation", true, "Uses the built-in keyboard emulation if using the terminal.\n\nConfirm: Enter\nCancel: Backspace\nArrows: Arrow Keys\nPage Keys: Numpad4/6");

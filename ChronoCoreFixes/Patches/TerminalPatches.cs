@@ -44,5 +44,25 @@ namespace ChronoCoreFixes.Patches {
             return true;
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(ReplayDataManager), "IsMatchCardRevision", typeof(ReplayInfo))]
+        static bool IsMatchCardRevision(ReplayInfo replayInfo, ref bool __result) {
+            Plugin.Log.LogDebug("Local cardRevision: " + VersionParamMgr.GetMatchingVerion() + ", Replay cardRevision: " + replayInfo.cardRevision);
+            if (Plugin.ConfigIgnoreReplayVersion.Value) {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ReplayDataManager), "IsMatchCardRevision", typeof(int))]
+        static bool IsMatchCardRevision(int cardRevision, ref bool __result) {
+            Plugin.Log.LogDebug("Local cardRevision: " + VersionParamMgr.GetMatchingVerion() + ", Replay cardRevision: " + cardRevision);
+            if (Plugin.ConfigIgnoreReplayVersion.Value) {
+                __result = true;
+                return false;
+            }
+            return true;
+        }
+
     }
 }
