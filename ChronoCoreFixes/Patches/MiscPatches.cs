@@ -1,14 +1,6 @@
-﻿using Comio;
-using Comio.BD15093_6;
+﻿using Comio.BD15093_6;
 using HarmonyLib;
 using MU3.Mecha;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 
 namespace ChronoCoreFixes.Patches {
     internal class MiscPatches {

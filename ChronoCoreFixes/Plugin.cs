@@ -4,27 +4,14 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using ChronoCoreFixes.Patches;
 using HarmonyLib;
-using HKBSys;
-using RD1;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Security.Policy;
-using System.Text;
-using System.Threading;
-using System.Xml.Linq;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 namespace ChronoCoreFixes {
 
@@ -39,7 +26,7 @@ namespace ChronoCoreFixes {
     [BepInPlugin("eu.haruka.gmg.chrono.fixes", "Chrono Regalia Core Fixes", VER)]
     public class Plugin : BaseUnityPlugin {
 
-        public const String VER = "2.5.1";
+        public const String VER = "2.6";
 
         private static Plugin Instance;
         public static ManualLogSource Log { get; private set; }
@@ -73,10 +60,17 @@ namespace ChronoCoreFixes {
         public static ConfigEntry<bool> ConfigForceTerminalKeyboardEmulation;
         public static ConfigEntry<int> LEDPort;
         public static ConfigEntry<bool> ConfigIgnoreReplayVersion;
+        public static ConfigEntry<bool> ConfigAMDAnalogInsteadOfButtons;
+        public static ConfigEntry<int> ConfigIO4StickDeadzone;
+        public static ConfigEntry<bool> ConfigIO4AxisXInvert;
+        public static ConfigEntry<bool> ConfigIO4AxisYInvert;
+
 
         public static String YDrivePath = null;
         public static String OptionPath = null;
         public static List<OptionImageInfo> optiondata = null;
+        public static InputId AnalogX { get; private set; }
+        public static InputId AnalogY { get; private set; }
 
         public static GameBootMode WantedBootMode { get; private set; }
 
@@ -131,6 +125,10 @@ namespace ChronoCoreFixes {
             }));
 
             LEDPort = Config.Bind("Real Hardware", "LED Port", 0, "Overrides the LED port. If 0, default is used (based on terminal/satellite)");
+            ConfigAMDAnalogInsteadOfButtons = Config.Bind("Real Hardware", "Use Analog instead of buttons", false, "Use analog for navigation instead of 4 buttons (Requires a modified terminal.json)");
+            ConfigIO4StickDeadzone = Config.Bind("Real Hardware", "Stick Deadzone", 30, "The stick deadzone in percent");
+            ConfigIO4AxisXInvert = Config.Bind("Real Hardware", "X Axis Invert", false, "Inverts the X axis");
+            ConfigIO4AxisYInvert = Config.Bind("Real Hardware", "Y Axis Invert", false, "Inverts the Y axis");
 
             GraphicShowSandglass.SettingChanged += UpdateGraphicSettings;
             GraphicShowVolumetricClouds.SettingChanged += UpdateGraphicSettings;
@@ -339,6 +337,12 @@ namespace ChronoCoreFixes {
         }
 
         private void Update() {
+            if (AnalogX == null && AMDaemon.Core.IsReady) {
+                AnalogX = new InputId("analog_x");
+                AnalogY = new InputId("analog_y");
+                Log.LogInfo("Analog initialized");
+            }
+
             if (ConfigShowMouse.Value && !Cursor.visible) {
                 Cursor.visible = true;
             } else if (!ConfigShowMouse.Value && Cursor.visible) {

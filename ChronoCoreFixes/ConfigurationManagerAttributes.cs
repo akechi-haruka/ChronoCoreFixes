@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ChronoCoreFixes {
+﻿namespace ChronoCoreFixes {
     /// <summary>
     /// Class that specifies how a setting should be displayed inside the ConfigurationManager settings window.
     /// 

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ChronoCoreFixes.Patches {
+﻿namespace ChronoCoreFixes.Patches {
 
     // No longer needed, were mostly logging statements from figuring out things
     internal class DebugPatches {

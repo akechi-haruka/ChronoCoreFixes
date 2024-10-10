@@ -1,11 +1,9 @@
-﻿using HarmonyLib;
+﻿using AMDaemon;
+using HarmonyLib;
 using HkbCom;
 using HKBSys;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace ChronoCoreFixes.Patches {
@@ -107,6 +105,67 @@ namespace ChronoCoreFixes.Patches {
             }
             __instance.replayDataRepository.Persist(replay, com.ResData.replayData);
             yield break;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(InputManager), "IsKeyOn")]
+        static bool IsKeyOn(CT.TerminalKeyId keyId, ref bool __result) {
+            if (Plugin.ConfigAMDAnalogInsteadOfButtons.Value) {
+                if (keyId == CT.TerminalKeyId.Up || keyId == CT.TerminalKeyId.Right || keyId == CT.TerminalKeyId.Down || keyId == CT.TerminalKeyId.Left) {
+                    __result = UpdateAnalog(keyId);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static Dictionary<CT.TerminalKeyId, bool> prevFrame = new Dictionary<CT.TerminalKeyId, bool>() {
+            { CT.TerminalKeyId.Up, false },
+            { CT.TerminalKeyId.Right, false },
+            { CT.TerminalKeyId.Down, false },
+            { CT.TerminalKeyId.Left, false },
+        };
+
+        [HarmonyPrefix, HarmonyPatch(typeof(InputManager), "IsKeyOnNow")]
+        static bool IsKeyOnNow(CT.TerminalKeyId keyId, ref bool __result) {
+            if (Plugin.ConfigAMDAnalogInsteadOfButtons.Value) {
+                if (keyId == CT.TerminalKeyId.Up || keyId == CT.TerminalKeyId.Right || keyId == CT.TerminalKeyId.Down || keyId == CT.TerminalKeyId.Left) {
+                    bool b = UpdateAnalog(keyId);
+                    __result = b && !prevFrame[keyId];
+                    prevFrame[keyId] = b;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static double map(double x, double in_min, double in_max, double out_min, double out_max) {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
+
+        private static bool UpdateAnalog(CT.TerminalKeyId keyId) {
+            InputUnit unit = AMDaemon.Input.System;
+
+            double deadzone = Plugin.ConfigIO4StickDeadzone.Value / 100F;
+            var ax = unit.GetAnalog(Plugin.AnalogX).Value;
+            var ay = unit.GetAnalog(Plugin.AnalogY).Value;
+            double x = map(ax, 0, 1, -1, 1);
+            double y = map(ay, 0, 1, -1, 1);
+            
+            if (Plugin.ConfigIO4AxisXInvert.Value) {
+                x = -x;
+            }
+            if (Plugin.ConfigIO4AxisYInvert.Value) {
+                y = -y;
+            }
+
+            bool on = (
+                (keyId == CT.TerminalKeyId.Up && y > deadzone) ||
+                (keyId == CT.TerminalKeyId.Right && x > deadzone) ||
+                (keyId == CT.TerminalKeyId.Down && y < -deadzone) ||
+                (keyId == CT.TerminalKeyId.Left && x < -deadzone)
+            );
+
+            return on;
         }
 
     }
